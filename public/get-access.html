@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Get Access â€” Mod Galaxy</title>
+<title>Get Access — Mod Galaxy</title>
 <link rel="icon" type="image/png" href="/static/site_logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -81,50 +81,50 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <div class="card">
     <!-- STEP 1: Get Access -->
     <div class="step active" id="step1">
-        <div class="step-icon">ðŸ”</div>
+        <div class="step-icon">🔒</div>
         <div class="step-title">Unlock Full Access</div>
         <div class="step-desc">Get a free 24-hour access code to unlock all premium content on Mod Galaxy.</div>
         <button class="btn btn-primary" id="btn-get-code" onclick="handleGetCode()">
-            <span id="btn-get-text">âš¡ Get Access Code</span>
+            <span id="btn-get-text">⚡ Get Access Code</span>
             <div class="loading-spinner" id="get-spinner"></div>
         </button>
-        <button class="btn btn-ghost" onclick="showStep(2)">ðŸ”‘ I already have a code</button>
+        <button class="btn btn-ghost" onclick="showStep(2)">🔑 I already have a code</button>
     </div>
 
     <!-- STEP 2: Enter Code -->
     <div class="step" id="step2">
-        <div class="step-icon">ðŸ”‘</div>
+        <div class="step-icon">🔑</div>
         <div class="step-title">Enter Access Code</div>
         <div class="step-desc">Paste your access code below to activate 24 hours of premium access.</div>
         <div class="input-wrap">
             <input type="text" class="code-input" id="code-input" placeholder="ASM-XXXXXX" maxlength="20" autocomplete="off" spellcheck="false">
         </div>
         <div class="error-msg" id="error-msg"></div>
-        <button class="btn btn-primary" onclick="handleVerify()">âœ… Verify & Activate</button>
+        <button class="btn btn-primary" onclick="handleVerify()">✅ Verify & Activate</button>
         <div class="divider"></div>
-        <button class="btn btn-ghost" onclick="showStep(1)" style="font-size:13px">â† Back</button>
+        <button class="btn btn-ghost" onclick="showStep(1)" style="font-size:13px">← Back</button>
     </div>
 
     <!-- STEP 3: Success -->
     <div class="step" id="step3">
-        <div class="step-icon">ðŸŽ‰</div>
+        <div class="step-icon">🎉</div>
         <span class="status-pill status-active">Access Active</span>
         <div class="step-title">You're All Set!</div>
         <div class="timer-display">
             <div class="timer-value" id="countdown">23:59:59</div>
             <div class="timer-label">Time Remaining</div>
         </div>
-        <button class="btn btn-success" onclick="window.location.href='/'">ðŸš€ Start Learning</button>
+        <button class="btn btn-success" onclick="window.location.href='/'">🚀 Start Learning</button>
     </div>
 </div>
 
 <div class="footer-text">
-    <a href="/">https://hariomrathor526-cmd.github.io/Rarestudclone/</a> â€” Free Educational Streaming
+    <a href="/">https://hariomrathor526-cmd.github.io/Rarestudclone/</a> — Free Educational Streaming
 </div>
 
 <script>
 (function(){
-    // â”€â”€â”€ Particle background â”€â”€â”€
+    // Particle background
     const pc=document.getElementById('particles');
     for(let i=0;i<30;i++){
         const p=document.createElement('div');
@@ -142,7 +142,7 @@ const LS_PENDING='_asm_pending_auth';
 const LS_EXPIRY='asm_access_expiry';
 const BRAND_PREFIX='ASM-';
 
-// â”€â”€â”€ On load: check URL for returning code, or check active session â”€â”€â”€
+// On load: check URL for returning code, or check active session
 (function init(){
     const qs=new URLSearchParams(location.search);
     const urlCode=qs.get('code');
@@ -155,11 +155,11 @@ const BRAND_PREFIX='ASM-';
         return;
     }
 
-    // If returning with a code
+    // If returning with a code in URL
     if(urlCode){
         showStep(2);
         document.getElementById('code-input').value=urlCode;
-        // Clean URL
+        // Clean URL without page reload
         history.replaceState(null,'',location.pathname);
         return;
     }
@@ -201,27 +201,30 @@ async function handleGetCode(){
 
     const code=generateCode();
 
-    // IMMEDIATELY save to localStorage as device fingerprint
+    // Save code to localStorage as device fingerprint
     localStorage.setItem(LS_PENDING,code);
 
-    // Current page URL to avoid 404
+    // FIX 404: Route back to current page path safely
     const returnUrl = window.location.origin + window.location.pathname + '?code=' + encodeURIComponent(code);
 
     try{
-        const res=await fetch('/api/vplink?url='+encodeURIComponent(returnUrl));
+        const res = await fetch('/api/vplink?url=' + encodeURIComponent(returnUrl));
+        
+        // Check if API endpoint exists
         if(!res.ok) throw new Error('API route missing');
 
-        const data=await res.json();
-        const shortUrl=data.shortenedUrl||data.short_url||data.shorturl||data.data;
+        const data = await res.json();
+        const shortUrl = data.shortenedUrl || data.short_url || data.shorturl || data.data;
 
-        if(shortUrl && typeof shortUrl==='string' && shortUrl.startsWith('http')){
-            window.location.href=shortUrl;
+        if(shortUrl && typeof shortUrl === 'string' && shortUrl.startsWith('http')){
+            window.location.href = shortUrl;
         } else {
-            window.location.href=returnUrl;
+            window.location.href = returnUrl;
         }
     }catch(err){
-        console.warn('API error or missing route, redirecting directly:',err);
-        window.location.href=returnUrl;
+        console.warn('Redirecting directly (API Bypass):', err);
+        // Direct redirection to prevent 404 block
+        window.location.href = returnUrl;
     }finally{
         btn.disabled=false;
         txt.style.display='inline';
@@ -262,7 +265,6 @@ function handleVerify(){
 }
 
 function grantAccess(){
-    // Clean up pending code
     localStorage.removeItem(LS_PENDING);
 
     // Set 24-hour expiry
