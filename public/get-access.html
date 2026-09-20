@@ -141,7 +141,6 @@ const MASTER_KEYS=['ADMIN2026','VIPPASS','ASMULTI99','MASTERKEY'];
 const LS_PENDING='_asm_pending_auth';
 const LS_EXPIRY='asm_access_expiry';
 const BRAND_PREFIX='ASM-';
-const SITE_ORIGIN=location.origin;
 
 // â”€â”€â”€ On load: check URL for returning code, or check active session â”€â”€â”€
 (function init(){
@@ -156,7 +155,7 @@ const SITE_ORIGIN=location.origin;
         return;
     }
 
-    // If returning from VPLINK with a code
+    // If returning with a code
     if(urlCode){
         showStep(2);
         document.getElementById('code-input').value=urlCode;
@@ -205,25 +204,23 @@ async function handleGetCode(){
     // IMMEDIATELY save to localStorage as device fingerprint
     localStorage.setItem(LS_PENDING,code);
 
-    const returnUrl=SITE_ORIGIN+'/get-access?code='+encodeURIComponent(code);
+    // Current page URL to avoid 404
+    const returnUrl = window.location.origin + window.location.pathname + '?code=' + encodeURIComponent(code);
 
     try{
         const res=await fetch('/api/vplink?url='+encodeURIComponent(returnUrl));
-        const data=await res.json();
+        if(!res.ok) throw new Error('API route missing');
 
-        // VPLINK API typically returns { shortenedUrl: "..." } or { status: "success", shortenedUrl: "..." }
+        const data=await res.json();
         const shortUrl=data.shortenedUrl||data.short_url||data.shorturl||data.data;
 
         if(shortUrl && typeof shortUrl==='string' && shortUrl.startsWith('http')){
             window.location.href=shortUrl;
         } else {
-            // Fallback: if VPLINK fails, go direct (no revenue but user isn't stuck)
-            console.warn('VPLINK response:',data);
             window.location.href=returnUrl;
         }
     }catch(err){
-        console.error('VPLINK proxy error:',err);
-        // Fallback direct
+        console.warn('API error or missing route, redirecting directly:',err);
         window.location.href=returnUrl;
     }finally{
         btn.disabled=false;
@@ -241,7 +238,7 @@ function handleVerify(){
         return;
     }
 
-    // Check master keys first (bypass fingerprint check)
+    // Check master keys first
     if(MASTER_KEYS.includes(input)){
         grantAccess();
         return;
